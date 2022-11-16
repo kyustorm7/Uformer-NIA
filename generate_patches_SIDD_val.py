@@ -7,13 +7,12 @@ import cv2
 from joblib import Parallel, delayed
 import multiprocessing
 import argparse
-from tqdm import tqdm
 
 parser = argparse.ArgumentParser(description='Generate patches from Full Resolution images')
 parser.add_argument('--src_dir', default='../SIDD_Medium_Srgb/Data', type=str, help='Directory for full resolution images')
 parser.add_argument('--tar_dir', default='../datasets/denoising/sidd/train',type=str, help='Directory for image patches')
 parser.add_argument('--ps', default=256, type=int, help='Image Patch Size')
-parser.add_argument('--num_patches', default=100, type=int, help='Number of patches per image')
+parser.add_argument('--num_patches', default=300, type=int, help='Number of patches per image')
 parser.add_argument('--num_cores', default=10, type=int, help='Number of CPU Cores')
 
 args = parser.parse_args()
@@ -38,16 +37,15 @@ noisy_files, clean_files = [], []
 
 
 for instance in os.listdir(path=src):
-    print(instance)
     files = natsorted(glob(os.path.join(src, instance, '*.jpg')))
 
     noisy_files_instance = []
     clean_files_instance = []
-    for file_ in tqdm(files):
+    for ii, file_ in enumerate(files):
         filename = os.path.split(file_)[-1]
         if 'GT' in filename:
             clean_files_instance.append(file_)
-        else:
+        elif ii % 15 == 0:
             noisy_files_instance.append(file_)
             
     assert len(clean_files_instance) == 1, '{} has {} GT images'.format(instance, len(clean_files_instance))
